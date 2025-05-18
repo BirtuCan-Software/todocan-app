@@ -19,7 +19,7 @@ class HistoryPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Expanded(child: TodoList()),
+        Expanded(child: TodoList(todos: [],)),
       ],
     );
   }

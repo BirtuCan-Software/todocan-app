@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
           animation: const AlwaysStoppedAnimation(1),
           content: Row(
             children: [
-              const Icon(Icons.check_circle, color: Colors.white),
+              Icon(Icons.check_circle, color: Theme.of(context).colorScheme.onPrimary),
               const SizedBox(width: 10),
               Text("Todo added successfully!"),
             ],
@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.notifications),
             ),
           ],
-          foregroundColor: Colors.white,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
         drawer: AppDrawer(),
@@ -145,8 +145,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
               currentIndex: _currentIndex,
               onTap: onItemTapped,
-              selectedItemColor: Colors.white,
-              unselectedItemColor: Colors.white60,
+              selectedItemColor: Theme.of(context).colorScheme.onPrimary,
+              unselectedItemColor: Theme.of(
+                context,
+              ).colorScheme.onPrimary.withAlpha(150),
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           ),
@@ -154,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _showAddTodoDialog,
           backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           label: const Text("Add Todo"),
           icon: const Icon(Icons.add),
         ),

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/todo_provider.dart';
 
 import '../widgets/todo_list.dart';
 
-class BrowsePage extends StatelessWidget {
+class BrowsePage extends ConsumerWidget {
   const BrowsePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final todoProvider = ref.watch(todosProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -19,7 +22,27 @@ class BrowsePage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Expanded(child: TodoList()),
+        todoProvider.when(
+          data: (data) => Expanded(child: TodoList(todos: data)),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error:
+              (error, stack) => Center(
+                child: SingleChildScrollView(
+                  child: Builder(
+                    builder: (context) {
+                      print(stack.toString());
+                      return Text(
+                        "Error: $error",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+        ),
       ],
     );
   }

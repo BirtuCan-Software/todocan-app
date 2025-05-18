@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/app_router.dart';
 
 void main() {
-  runApp(TodoCan());
+  runApp(ProviderScope(child: TodoCan()));
 }
 
 class TodoCan extends StatelessWidget {

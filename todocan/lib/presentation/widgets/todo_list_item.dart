@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../models/todo.dart';
 import 'add_edit_todo_dialog.dart';
 
 class TodoListItem extends StatefulWidget {
-  const TodoListItem({super.key});
+  const TodoListItem({super.key, required this.todo});
+
+  final Todo todo;
 
   @override
   State<TodoListItem> createState() => _TodoListItemState();
@@ -35,13 +38,17 @@ class _TodoListItemState extends State<TodoListItem> {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: Key("todo_id"), // Replace with a unique key for each todo
+      key: Key(widget.todo.id.toString()),
       direction: DismissDirection.endToStart,
       background: Container(
         color: Theme.of(context).colorScheme.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        child: Icon(Icons.delete, color: Colors.white, size: 30),
+        child: Icon(
+          Icons.delete,
+          color: Theme.of(context).colorScheme.onPrimary,
+          size: 30,
+        ),
       ),
       onDismissed: (direction) {
         // Handle the deletion of the todo item
@@ -74,7 +81,7 @@ class _TodoListItemState extends State<TodoListItem> {
             children: [
               Flexible(
                 child: Text(
-                  "Wash dishes and do a lot of stuff behind the a",
+                  widget.todo.title,
                   style: TextStyle(
                     fontWeight: FontWeight.w400,
                     fontSize: 18,
@@ -100,7 +107,7 @@ class _TodoListItemState extends State<TodoListItem> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Wash breakfast dishes and clean the sink afterwards to avoid any mess.",
+                widget.todo.description,
                 style: TextStyle(
                   fontSize: 10,
                   color: Theme.of(context).colorScheme.tertiary,
@@ -108,7 +115,7 @@ class _TodoListItemState extends State<TodoListItem> {
                 maxLines: 2,
               ),
               Text(
-                "Duration: 30 min",
+                "Duration: ${widget.todo.durationInMinutes} min",
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).colorScheme.primary,
@@ -121,7 +128,7 @@ class _TodoListItemState extends State<TodoListItem> {
                   const SizedBox(width: 5),
                   Row(
                     children: [
-                      for (int i = 0; i < 4; i++)
+                      for (int i = 0; i < widget.todo.canLevel; i++)
                         Icon(
                           Icons.diamond_outlined,
                           size: 12,
