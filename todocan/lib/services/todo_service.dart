@@ -24,7 +24,7 @@ class TodoService {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
-        body: todo,
+        body: jsonEncode(todo),
       );
 
       if (response.statusCode != 201) {
@@ -35,23 +35,27 @@ class TodoService {
     }
   }
 
-  // Future<void> updateTodo(String id, Map<String, dynamic> todo) async {
-  //   final response = await http.put(
-  //     Uri.parse('$apiUrl/$id'),
-  //     headers: {'Content-Type': 'application/json'},
-  //     body: todo,
-  //   );
+  Future<void> updateTodo(Map<String, dynamic> todo) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$apiUrl${todo['id']}/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(todo),
+      );
 
-  //   if (response.statusCode != 200) {
-  //     throw Exception('Failed to update todo');
-  //   }
-  // }
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update todo');
+      }
+    } catch (e) {
+      throw Exception('Failed to update todo: $e');
+    }
+  }
 
-  // Future<void> deleteTodo(String id) async {
-  //   final response = await http.delete(Uri.parse('$apiUrl/$id'));
+  Future<void> deleteTodo(String id) async {
+    final response = await http.delete(Uri.parse('$apiUrl$id/'));
 
-  //   if (response.statusCode != 200) {
-  //     throw Exception('Failed to delete todo');
-  //   }
-  // }
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete todo');
+    }
+  }
 }

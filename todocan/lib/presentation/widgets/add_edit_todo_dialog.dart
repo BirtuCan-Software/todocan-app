@@ -1,36 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/todo.dart';
+import '../../providers/todo_provider.dart';
 
-class AddEditTodoDialog extends StatefulWidget {
+class AddEditTodoDialog extends ConsumerStatefulWidget {
   const AddEditTodoDialog({super.key, this.todo, this.isEditMode = false});
 
-  final String? todo; // TODO: Replace with a Todo model
+  final Todo? todo;
   final bool isEditMode;
 
   @override
-  State<AddEditTodoDialog> createState() => _AddEditTodoDialogState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _AddEditTodoDialogState();
 }
 
-class _AddEditTodoDialogState extends State<AddEditTodoDialog> {
+class _AddEditTodoDialogState extends ConsumerState<AddEditTodoDialog> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _titleController = TextEditingController(
-    text: "Initial",
-  );
+  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _durationController = TextEditingController();
   int _canLevel = 0;
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     String title = _titleController.text;
     String description = _descriptionController.text;
     int duration = int.parse(_durationController.text);
 
-    print("Operation: ${widget.isEditMode ? "Edit" : "Add"}");
-    print("Title: $title");
-    print("Description: $description");
-    print("Duration: $duration");
-    print("Can Level: $_canLevel");
+    if (!widget.isEditMode) {
+      await ref
+          .read(todosProvider.notifier)
+          .addTodo(
+            Todo(
+              title: title,
+              description: description,
+              completed: false,
+              canLevel: _canLevel,
+              durationInMinutes: duration,
+            ),
+          );
+    } else {
+      await ref
+          .read(todosProvider.notifier)
+          .updateTodo(
+            Todo(
+              id: widget.todo!.id,
+              title: title,
+              description: description,
+              completed: widget.todo!.completed,
+              canLevel: _canLevel,
+              durationInMinutes: duration,
+            ),
+          );
+    }
 
     _titleController.clear();
     _descriptionController.clear();
@@ -39,6 +62,7 @@ class _AddEditTodoDialogState extends State<AddEditTodoDialog> {
       _canLevel = 0;
     });
 
+    if (!mounted) return;
     Navigator.of(context).pop(true);
   }
 
@@ -48,6 +72,17 @@ class _AddEditTodoDialogState extends State<AddEditTodoDialog> {
     _descriptionController.dispose();
     _durationController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    if (widget.isEditMode && widget.todo != null) {
+      _titleController.text = widget.todo!.title;
+      _descriptionController.text = widget.todo!.description;
+      _durationController.text = widget.todo!.durationInMinutes.toString();
+      _canLevel = widget.todo!.canLevel;
+    }
+    super.initState();
   }
 
   @override

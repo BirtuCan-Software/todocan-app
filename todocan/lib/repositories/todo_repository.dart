@@ -22,4 +22,20 @@ class TodoRepository {
       throw Exception('Failed to add todo: $e');
     }
   }
+
+  Future<void> updateTodo(Todo todo) async {
+    try {
+      await todoService.updateTodo(todo.toMap());
+    } catch (e) {
+      throw Exception('Failed to update todo: $e');
+    }
+  }
+
+  Future<void> deleteTodo(String id) async {
+    try {
+      await todoService.deleteTodo(id);
+    } catch (e) {
+      throw Exception('Failed to delete todo: $e');
+    }
+  }
 }

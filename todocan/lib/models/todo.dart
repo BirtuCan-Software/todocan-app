@@ -7,8 +7,8 @@ class Todo {
   final bool completed;
   final int canLevel;
   final int durationInMinutes;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Todo({
     this.id,
@@ -17,8 +17,8 @@ class Todo {
     required this.completed,
     required this.canLevel,
     required this.durationInMinutes,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {

@@ -27,18 +27,11 @@ class BrowsePage extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error:
               (error, stack) => Center(
-                child: SingleChildScrollView(
-                  child: Builder(
-                    builder: (context) {
-                      print(stack.toString());
-                      return Text(
-                        "Error: $error",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      );
-                    },
+                child: Text(
+                  "Error: $error",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.error,
                   ),
                 ),
               ),

@@ -1,29 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../models/todo.dart';
+import '../../providers/todo_provider.dart';
 import 'add_edit_todo_dialog.dart';
 
-class TodoListItem extends StatefulWidget {
+class TodoListItem extends ConsumerStatefulWidget {
   const TodoListItem({super.key, required this.todo});
 
   final Todo todo;
 
   @override
-  State<TodoListItem> createState() => _TodoListItemState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _TodoListItemState();
 }
 
-class _TodoListItemState extends State<TodoListItem> {
+class _TodoListItemState extends ConsumerState<TodoListItem> {
   Future<void> _showTodoEditDialog() async {
     bool? isSaved = await showDialog(
       context: context,
       builder: (context) {
-        return AddEditTodoDialog(todo: "Todo object here", isEditMode: true);
+        return AddEditTodoDialog(todo: widget.todo, isEditMode: true);
       },
     );
     if (!mounted) return;
     if (isSaved != null && isSaved) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Todo updated successfully!"),
+          animation: const AlwaysStoppedAnimation(1),
+          content: Row(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              const SizedBox(width: 10),
+              Text("Todo updated successfully!"),
+            ],
+          ),
           duration: Duration(seconds: 2),
           backgroundColor: Theme.of(context).colorScheme.primary,
           behavior: SnackBarBehavior.floating,
@@ -33,6 +46,73 @@ class _TodoListItemState extends State<TodoListItem> {
         ),
       );
     }
+  }
+
+  Future<void> _handleTodoDismissal(direction) async {
+    bool? confirmed = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Delete Todo"),
+          content: Text("Are you sure you want to delete this todo?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != null && confirmed) {
+      await ref
+          .read(todosProvider.notifier)
+          .deleteTodo(widget.todo.id.toString());
+    } else {
+      return;
+    }
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        animation: const AlwaysStoppedAnimation(1),
+        content: Row(
+          children: [
+            Icon(
+              Icons.check_circle,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            const SizedBox(width: 10),
+            Text("Todo deleted successfully!"),
+          ],
+        ),
+        duration: Duration(seconds: 2),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  Future<void> _handleCompletedToggle() async {
+    await ref
+        .read(todosProvider.notifier)
+        .updateTodo(
+          Todo(
+            title: widget.todo.title,
+            description: widget.todo.description,
+            completed: !widget.todo.completed,
+            canLevel: widget.todo.canLevel,
+            durationInMinutes: widget.todo.durationInMinutes,
+            id: widget.todo.id,
+          ),
+        );
   }
 
   @override
@@ -50,20 +130,7 @@ class _TodoListItemState extends State<TodoListItem> {
           size: 30,
         ),
       ),
-      onDismissed: (direction) {
-        // Handle the deletion of the todo item
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Todo deleted successfully!"),
-            duration: Duration(seconds: 2),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
-      },
+      onDismissed: _handleTodoDismissal,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5),
@@ -92,13 +159,17 @@ class _TodoListItemState extends State<TodoListItem> {
                 ),
               ),
               InkWell(
-                onTap: () {
-                  // Add your action here
-                },
-                child: Icon(
-                  Icons.check_box_outline_blank,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                onTap: _handleCompletedToggle,
+                child:
+                    widget.todo.completed
+                        ? Icon(
+                          Icons.check_box,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
+                        : Icon(
+                          Icons.check_box_outline_blank,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
               ),
             ],
           ),
